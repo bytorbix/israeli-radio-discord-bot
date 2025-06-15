@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  israeli-radio-bot:
+    build: .
+    container_name: israeli-radio-bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - NODE_ENV=production
+      - DEFAULT_VOLUME=0.3
+      - AUTO_RECONNECT=true
+    env_file:
+      - .env
+    volumes:
+      # Optional: Mount logs directory for persistent logs
+      - ./logs:/usr/src/app/logs
+    networks:
+      - radio-bot-network
+    
+    # Resource limits (recommended for production)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('Health check')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  radio-bot-network:
+    driver: bridge
